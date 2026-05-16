@@ -18,7 +18,7 @@
   ],
   "panels": [
     {
-      "id": 100,
+      "id": 200,
       "type": "row",
       "title": "🔴 버블 신호 (7대 위험 지표)",
       "collapsed": false,
@@ -34,9 +34,9 @@
       "id": 1,
       "type": "stat",
       "title": "① 버핏 지수 (Buffett Indicator)",
-      "description": "워런 버핏이 '가장 좋은 단일 지표'라고 언급. 미국 주식시장 시총 ÷ GDP × 100. 현재 ~230% (적정 75-90%, 위험 ≥120%)",
+      "description": "시총 ÷ GDP × 100. 적정 75-90%, 위험 ≥120%, 현재 ~230%",
       "gridPos": {
-        "h": 9,
+        "h": 3,
         "w": 6,
         "x": 0,
         "y": 1
@@ -48,8 +48,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "fixed",
-            "fixedColor": "#F2495C"
+            "mode": "thresholds"
           },
           "unit": "percent",
           "decimals": 2,
@@ -76,8 +75,8 @@
         "overrides": []
       },
       "options": {
-        "graphMode": "area",
-        "colorMode": "value",
+        "graphMode": "none",
+        "colorMode": "background",
         "justifyMode": "center",
         "textMode": "value",
         "orientation": "auto",
@@ -89,11 +88,89 @@
           "values": false
         },
         "text": {
-          "valueSize": 38
+          "valueSize": 32
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "macro-influxdb"
+          },
+          "query": "from(bucket: \"macro_indicators\")\n  |> range(start: -5y)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"buffett_indicator\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> last()",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 101,
+      "type": "timeseries",
+      "title": "",
+      "description": "시총 ÷ GDP × 100. 적정 75-90%, 위험 ≥120%, 현재 ~230%",
+      "gridPos": {
+        "h": 9,
+        "w": 6,
+        "x": 0,
+        "y": 4
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "macro-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#F2495C"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "gradientMode": "opacity",
+            "showPoints": "auto",
+            "pointSize": 4,
+            "spanNulls": true,
+            "axisBorderShow": false
+          },
+          "unit": "percent",
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 120
+              },
+              {
+                "color": "red",
+                "value": 200
+              }
+            ]
+          },
+          "mappings": []
         },
+        "overrides": []
+      },
+      "options": {
         "tooltip": {
           "mode": "single",
           "sort": "none"
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "lastNotNull",
+            "min",
+            "max"
+          ]
         }
       },
       "targets": [
@@ -111,9 +188,9 @@
       "id": 2,
       "type": "stat",
       "title": "② 쉴러 PER (CAPE Ratio)",
-      "description": "물가 보정 10년 평균 실적 기준 PER. 역사적 평균 17.7배. 현재 ~40배 (역대 2위, 1위=닷컴버블 44.2배)",
+      "description": "물가 보정 10년 평균 PER. 역사 평균 17.7배, 현재 ~40배",
       "gridPos": {
-        "h": 9,
+        "h": 3,
         "w": 6,
         "x": 6,
         "y": 1
@@ -125,8 +202,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "fixed",
-            "fixedColor": "#FF9830"
+            "mode": "thresholds"
           },
           "unit": "none",
           "decimals": 2,
@@ -153,8 +229,8 @@
         "overrides": []
       },
       "options": {
-        "graphMode": "area",
-        "colorMode": "value",
+        "graphMode": "none",
+        "colorMode": "background",
         "justifyMode": "center",
         "textMode": "value",
         "orientation": "auto",
@@ -166,11 +242,89 @@
           "values": false
         },
         "text": {
-          "valueSize": 38
+          "valueSize": 32
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "macro-influxdb"
+          },
+          "query": "from(bucket: \"macro_indicators\")\n  |> range(start: -5y)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"shiller_cape\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> last()",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 102,
+      "type": "timeseries",
+      "title": "",
+      "description": "물가 보정 10년 평균 PER. 역사 평균 17.7배, 현재 ~40배",
+      "gridPos": {
+        "h": 9,
+        "w": 6,
+        "x": 6,
+        "y": 4
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "macro-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#FF9830"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "gradientMode": "opacity",
+            "showPoints": "auto",
+            "pointSize": 4,
+            "spanNulls": true,
+            "axisBorderShow": false
+          },
+          "unit": "none",
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 25
+              },
+              {
+                "color": "red",
+                "value": 35
+              }
+            ]
+          },
+          "mappings": []
         },
+        "overrides": []
+      },
+      "options": {
         "tooltip": {
           "mode": "single",
           "sort": "none"
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "lastNotNull",
+            "min",
+            "max"
+          ]
         }
       },
       "targets": [
@@ -188,9 +342,9 @@
       "id": 3,
       "type": "stat",
       "title": "③ 공포 탐욕 지수 (Fear & Greed)",
-      "description": "CNN 제작 단기 심리 지표 (0=극도 공포, 100=극도 탐욕). 한 달 만에 27→69 급등",
+      "description": "CNN 심리지표 (0=공포, 100=탐욕). 한 달 만에 27→69",
       "gridPos": {
-        "h": 9,
+        "h": 3,
         "w": 6,
         "x": 12,
         "y": 1
@@ -202,8 +356,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "fixed",
-            "fixedColor": "#FADE2A"
+            "mode": "thresholds"
           },
           "unit": "none",
           "decimals": 2,
@@ -230,8 +383,8 @@
         "overrides": []
       },
       "options": {
-        "graphMode": "area",
-        "colorMode": "value",
+        "graphMode": "none",
+        "colorMode": "background",
         "justifyMode": "center",
         "textMode": "value",
         "orientation": "auto",
@@ -243,11 +396,89 @@
           "values": false
         },
         "text": {
-          "valueSize": 38
+          "valueSize": 32
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "macro-influxdb"
+          },
+          "query": "from(bucket: \"macro_indicators\")\n  |> range(start: -5y)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"fear_greed_index\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> last()",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 103,
+      "type": "timeseries",
+      "title": "",
+      "description": "CNN 심리지표 (0=공포, 100=탐욕). 한 달 만에 27→69",
+      "gridPos": {
+        "h": 9,
+        "w": 6,
+        "x": 12,
+        "y": 4
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "macro-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#FADE2A"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "gradientMode": "opacity",
+            "showPoints": "auto",
+            "pointSize": 4,
+            "spanNulls": true,
+            "axisBorderShow": false
+          },
+          "unit": "none",
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 85
+              }
+            ]
+          },
+          "mappings": []
         },
+        "overrides": []
+      },
+      "options": {
         "tooltip": {
           "mode": "single",
           "sort": "none"
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "lastNotNull",
+            "min",
+            "max"
+          ]
         }
       },
       "targets": [
@@ -264,10 +495,10 @@
     {
       "id": 4,
       "type": "stat",
-      "title": "④ 신용융자 잔고 (Margin Debt)",
-      "description": "빚내서 투자하는 금액 (십억 달러). 현재 ~1.2조 달러, 전년比 +38.7%. 하락 시 마진콜 → 폭락 가속 위험",
+      "title": "④ 신용융자 잔고 (Margin Debt, B$)",
+      "description": "빚내서 투자하는 금액 (십억 달러). 전년比 +38.7%",
       "gridPos": {
-        "h": 9,
+        "h": 3,
         "w": 6,
         "x": 18,
         "y": 1
@@ -279,8 +510,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "fixed",
-            "fixedColor": "#F2495C"
+            "mode": "thresholds"
           },
           "unit": "short",
           "decimals": 2,
@@ -307,8 +537,8 @@
         "overrides": []
       },
       "options": {
-        "graphMode": "area",
-        "colorMode": "value",
+        "graphMode": "none",
+        "colorMode": "background",
         "justifyMode": "center",
         "textMode": "value",
         "orientation": "auto",
@@ -320,11 +550,89 @@
           "values": false
         },
         "text": {
-          "valueSize": 38
+          "valueSize": 32
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "macro-influxdb"
+          },
+          "query": "from(bucket: \"macro_indicators\")\n  |> range(start: -5y)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"margin_debt\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> last()",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 104,
+      "type": "timeseries",
+      "title": "",
+      "description": "빚내서 투자하는 금액 (십억 달러). 전년比 +38.7%",
+      "gridPos": {
+        "h": 9,
+        "w": 6,
+        "x": 18,
+        "y": 4
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "macro-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#F2495C"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "gradientMode": "opacity",
+            "showPoints": "auto",
+            "pointSize": 4,
+            "spanNulls": true,
+            "axisBorderShow": false
+          },
+          "unit": "short",
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 900
+              },
+              {
+                "color": "red",
+                "value": 1100
+              }
+            ]
+          },
+          "mappings": []
         },
+        "overrides": []
+      },
+      "options": {
         "tooltip": {
           "mode": "single",
           "sort": "none"
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "lastNotNull",
+            "min",
+            "max"
+          ]
         }
       },
       "targets": [
@@ -342,12 +650,12 @@
       "id": 5,
       "type": "stat",
       "title": "⑤ 매그니피센트 7 집중도",
-      "description": "애플·MS·구글·아마존·메타·엔비디아·테슬라 7개사가 S&P 500에서 차지하는 비중. 현재 33.7% (2016년 12.5%에서 3배 증가)",
+      "description": "M7이 S&P 500에서 차지하는 비중. 현재 33.7% (2016년 12.5%의 3배)",
       "gridPos": {
-        "h": 9,
+        "h": 3,
         "w": 8,
         "x": 0,
-        "y": 10
+        "y": 13
       },
       "datasource": {
         "type": "influxdb",
@@ -356,8 +664,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "fixed",
-            "fixedColor": "#FF780A"
+            "mode": "thresholds"
           },
           "unit": "percent",
           "decimals": 2,
@@ -384,8 +691,8 @@
         "overrides": []
       },
       "options": {
-        "graphMode": "area",
-        "colorMode": "value",
+        "graphMode": "none",
+        "colorMode": "background",
         "justifyMode": "center",
         "textMode": "value",
         "orientation": "auto",
@@ -397,11 +704,89 @@
           "values": false
         },
         "text": {
-          "valueSize": 38
+          "valueSize": 32
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "macro-influxdb"
+          },
+          "query": "from(bucket: \"macro_indicators\")\n  |> range(start: -5y)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"mag7_concentration\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> last()",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 105,
+      "type": "timeseries",
+      "title": "",
+      "description": "M7이 S&P 500에서 차지하는 비중. 현재 33.7% (2016년 12.5%의 3배)",
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 0,
+        "y": 16
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "macro-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#FF780A"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "gradientMode": "opacity",
+            "showPoints": "auto",
+            "pointSize": 4,
+            "spanNulls": true,
+            "axisBorderShow": false
+          },
+          "unit": "percent",
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 20
+              },
+              {
+                "color": "red",
+                "value": 30
+              }
+            ]
+          },
+          "mappings": []
         },
+        "overrides": []
+      },
+      "options": {
         "tooltip": {
           "mode": "single",
           "sort": "none"
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "lastNotNull",
+            "min",
+            "max"
+          ]
         }
       },
       "targets": [
@@ -418,13 +803,13 @@
     {
       "id": 6,
       "type": "stat",
-      "title": "⑥ 버크셔 해서웨이 현금",
-      "description": "버크셔 현금+단기국채 보유액 (십억 달러). 현재 ~3,970억 달러 (약 540조원). 닷컴버블·서브프라임 직전과 유사한 패턴",
+      "title": "⑥ 버크셔 현금 (B$)",
+      "description": "버크셔 현금+단기국채. 현재 ~3,970억 달러 (~540조원)",
       "gridPos": {
-        "h": 9,
+        "h": 3,
         "w": 8,
         "x": 8,
-        "y": 10
+        "y": 13
       },
       "datasource": {
         "type": "influxdb",
@@ -433,8 +818,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "fixed",
-            "fixedColor": "#FF4D4D"
+            "mode": "thresholds"
           },
           "unit": "short",
           "decimals": 2,
@@ -453,8 +837,8 @@
         "overrides": []
       },
       "options": {
-        "graphMode": "area",
-        "colorMode": "value",
+        "graphMode": "none",
+        "colorMode": "background",
         "justifyMode": "center",
         "textMode": "value",
         "orientation": "auto",
@@ -466,11 +850,81 @@
           "values": false
         },
         "text": {
-          "valueSize": 38
+          "valueSize": 32
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "macro-influxdb"
+          },
+          "query": "from(bucket: \"macro_indicators\")\n  |> range(start: -5y)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"berkshire_cash\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> last()",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 106,
+      "type": "timeseries",
+      "title": "",
+      "description": "버크셔 현금+단기국채. 현재 ~3,970억 달러 (~540조원)",
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 8,
+        "y": 16
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "macro-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#FF4D4D"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "gradientMode": "opacity",
+            "showPoints": "auto",
+            "pointSize": 4,
+            "spanNulls": true,
+            "axisBorderShow": false
+          },
+          "unit": "short",
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "mappings": []
         },
+        "overrides": []
+      },
+      "options": {
         "tooltip": {
           "mode": "single",
           "sort": "none"
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "lastNotNull",
+            "min",
+            "max"
+          ]
         }
       },
       "targets": [
@@ -487,13 +941,13 @@
     {
       "id": 7,
       "type": "stat",
-      "title": "⑦ AI 순환거래 지수 (NVDA 분기 매출 proxy)",
-      "description": "엔비디아 분기 매출 (십억 달러). AI 기업간 자금 순환의 핵심 proxy. 현재 분기 매출 ~52B",
+      "title": "⑦ AI 순환거래 (NVDA 분기매출, B$)",
+      "description": "엔비디아 분기 매출 (십억 달러). AI 자금 순환 proxy",
       "gridPos": {
-        "h": 9,
+        "h": 3,
         "w": 8,
         "x": 16,
-        "y": 10
+        "y": 13
       },
       "datasource": {
         "type": "influxdb",
@@ -502,8 +956,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "fixed",
-            "fixedColor": "#E02F44"
+            "mode": "thresholds"
           },
           "unit": "short",
           "decimals": 2,
@@ -522,8 +975,8 @@
         "overrides": []
       },
       "options": {
-        "graphMode": "area",
-        "colorMode": "value",
+        "graphMode": "none",
+        "colorMode": "background",
         "justifyMode": "center",
         "textMode": "value",
         "orientation": "auto",
@@ -535,11 +988,81 @@
           "values": false
         },
         "text": {
-          "valueSize": 38
+          "valueSize": 32
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "macro-influxdb"
+          },
+          "query": "from(bucket: \"macro_indicators\")\n  |> range(start: -5y)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"nvda_revenue\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> last()",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 107,
+      "type": "timeseries",
+      "title": "",
+      "description": "엔비디아 분기 매출 (십억 달러). AI 자금 순환 proxy",
+      "gridPos": {
+        "h": 9,
+        "w": 8,
+        "x": 16,
+        "y": 16
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "macro-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#E02F44"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "gradientMode": "opacity",
+            "showPoints": "auto",
+            "pointSize": 4,
+            "spanNulls": true,
+            "axisBorderShow": false
+          },
+          "unit": "short",
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "mappings": []
         },
+        "overrides": []
+      },
+      "options": {
         "tooltip": {
           "mode": "single",
           "sort": "none"
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "lastNotNull",
+            "min",
+            "max"
+          ]
         }
       },
       "targets": [
@@ -554,7 +1077,7 @@
       ]
     },
     {
-      "id": 101,
+      "id": 201,
       "type": "row",
       "title": "🟢 정상 신호 (5대 반론 지표)",
       "collapsed": false,
@@ -562,7 +1085,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 19
+        "y": 25
       },
       "panels": []
     },
@@ -570,12 +1093,12 @@
       "id": 8,
       "type": "stat",
       "title": "⑧ S&P 500 동일가중 선행 PER",
-      "description": "매그니피센트 7 왜곡 제거 후 PER. 현재 ~17배 = 10년 평균 수준. '나머지 493개 기업은 정상 가격'",
+      "description": "M7 왜곡 제거 후 PER. 현재 ~17배 = 10년 평균 수준",
       "gridPos": {
-        "h": 9,
+        "h": 3,
         "w": 6,
         "x": 0,
-        "y": 20
+        "y": 26
       },
       "datasource": {
         "type": "influxdb",
@@ -584,8 +1107,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "fixed",
-            "fixedColor": "#3CBC8D"
+            "mode": "thresholds"
           },
           "unit": "none",
           "decimals": 2,
@@ -612,8 +1134,8 @@
         "overrides": []
       },
       "options": {
-        "graphMode": "area",
-        "colorMode": "value",
+        "graphMode": "none",
+        "colorMode": "background",
         "justifyMode": "center",
         "textMode": "value",
         "orientation": "auto",
@@ -625,11 +1147,89 @@
           "values": false
         },
         "text": {
-          "valueSize": 38
+          "valueSize": 32
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "macro-influxdb"
+          },
+          "query": "from(bucket: \"macro_indicators\")\n  |> range(start: -5y)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"sp500_equal_weight_per\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> last()",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 108,
+      "type": "timeseries",
+      "title": "",
+      "description": "M7 왜곡 제거 후 PER. 현재 ~17배 = 10년 평균 수준",
+      "gridPos": {
+        "h": 9,
+        "w": 6,
+        "x": 0,
+        "y": 29
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "macro-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#3CBC8D"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "gradientMode": "opacity",
+            "showPoints": "auto",
+            "pointSize": 4,
+            "spanNulls": true,
+            "axisBorderShow": false
+          },
+          "unit": "none",
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 22
+              },
+              {
+                "color": "red",
+                "value": 28
+              }
+            ]
+          },
+          "mappings": []
         },
+        "overrides": []
+      },
+      "options": {
         "tooltip": {
           "mode": "single",
           "sort": "none"
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "lastNotNull",
+            "min",
+            "max"
+          ]
         }
       },
       "targets": [
@@ -647,12 +1247,12 @@
       "id": 9,
       "type": "stat",
       "title": "⑨ S&P 500 이익 성장률 (YoY %)",
-      "description": "S&P 500 기업 분기 이익 성장률. 6분기 연속 두 자릿수 성장. 2026 Q1: 15.1% (예상 10% 상회)",
+      "description": "6분기 연속 두 자릿수 성장. 2026 Q1: 15.1%",
       "gridPos": {
-        "h": 9,
+        "h": 3,
         "w": 6,
         "x": 6,
-        "y": 20
+        "y": 26
       },
       "datasource": {
         "type": "influxdb",
@@ -661,8 +1261,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "fixed",
-            "fixedColor": "#73BF69"
+            "mode": "thresholds"
           },
           "unit": "percent",
           "decimals": 2,
@@ -681,8 +1280,8 @@
         "overrides": []
       },
       "options": {
-        "graphMode": "area",
-        "colorMode": "value",
+        "graphMode": "none",
+        "colorMode": "background",
         "justifyMode": "center",
         "textMode": "value",
         "orientation": "auto",
@@ -694,11 +1293,81 @@
           "values": false
         },
         "text": {
-          "valueSize": 38
+          "valueSize": 32
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "macro-influxdb"
+          },
+          "query": "from(bucket: \"macro_indicators\")\n  |> range(start: -5y)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"sp500_eps_growth\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> last()",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 109,
+      "type": "timeseries",
+      "title": "",
+      "description": "6분기 연속 두 자릿수 성장. 2026 Q1: 15.1%",
+      "gridPos": {
+        "h": 9,
+        "w": 6,
+        "x": 6,
+        "y": 29
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "macro-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#73BF69"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "gradientMode": "opacity",
+            "showPoints": "auto",
+            "pointSize": 4,
+            "spanNulls": true,
+            "axisBorderShow": false
+          },
+          "unit": "percent",
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "mappings": []
         },
+        "overrides": []
+      },
+      "options": {
         "tooltip": {
           "mode": "single",
           "sort": "none"
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "lastNotNull",
+            "min",
+            "max"
+          ]
         }
       },
       "targets": [
@@ -715,13 +1384,13 @@
     {
       "id": 10,
       "type": "stat",
-      "title": "⑩ 빅테크 현금 보유 (M7 합산)",
-      "description": "매그니피센트 7 현금+단기투자 합산 (십억 달러). 현재 5,000억 달러 이상. 부채가 아닌 자기자본으로 AI 인프라 투자",
+      "title": "⑩ 빅테크 현금 (M7 합산, B$)",
+      "description": "M7 현금+단기투자 합산. 현재 5,000억+ 달러",
       "gridPos": {
-        "h": 9,
+        "h": 3,
         "w": 6,
         "x": 12,
-        "y": 20
+        "y": 26
       },
       "datasource": {
         "type": "influxdb",
@@ -730,8 +1399,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "fixed",
-            "fixedColor": "#5794F2"
+            "mode": "thresholds"
           },
           "unit": "short",
           "decimals": 2,
@@ -750,8 +1418,8 @@
         "overrides": []
       },
       "options": {
-        "graphMode": "area",
-        "colorMode": "value",
+        "graphMode": "none",
+        "colorMode": "background",
         "justifyMode": "center",
         "textMode": "value",
         "orientation": "auto",
@@ -763,11 +1431,81 @@
           "values": false
         },
         "text": {
-          "valueSize": 38
+          "valueSize": 32
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "macro-influxdb"
+          },
+          "query": "from(bucket: \"macro_indicators\")\n  |> range(start: -5y)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"bigtech_cash\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> last()",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 110,
+      "type": "timeseries",
+      "title": "",
+      "description": "M7 현금+단기투자 합산. 현재 5,000억+ 달러",
+      "gridPos": {
+        "h": 9,
+        "w": 6,
+        "x": 12,
+        "y": 29
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "macro-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#5794F2"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "gradientMode": "opacity",
+            "showPoints": "auto",
+            "pointSize": 4,
+            "spanNulls": true,
+            "axisBorderShow": false
+          },
+          "unit": "short",
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "mappings": []
         },
+        "overrides": []
+      },
+      "options": {
         "tooltip": {
           "mode": "single",
           "sort": "none"
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "lastNotNull",
+            "min",
+            "max"
+          ]
         }
       },
       "targets": [
@@ -785,12 +1523,12 @@
       "id": 11,
       "type": "stat",
       "title": "⑪ 미국 실질 GDP 성장률 (YoY %)",
-      "description": "FRED GDPC1 기준 실질 GDP 전년비 성장률. 2026 Q1: +2.0%. AI 투자가 거시경제 생산성으로 연결되는 신호",
+      "description": "FRED GDPC1. 2026 Q1: +2.0%. AI 투자가 생산성으로 연결",
       "gridPos": {
-        "h": 9,
+        "h": 3,
         "w": 6,
         "x": 18,
-        "y": 20
+        "y": 26
       },
       "datasource": {
         "type": "influxdb",
@@ -799,8 +1537,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "fixed",
-            "fixedColor": "#37872D"
+            "mode": "thresholds"
           },
           "unit": "percent",
           "decimals": 2,
@@ -819,8 +1556,8 @@
         "overrides": []
       },
       "options": {
-        "graphMode": "area",
-        "colorMode": "value",
+        "graphMode": "none",
+        "colorMode": "background",
         "justifyMode": "center",
         "textMode": "value",
         "orientation": "auto",
@@ -832,11 +1569,81 @@
           "values": false
         },
         "text": {
-          "valueSize": 38
+          "valueSize": 32
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "macro-influxdb"
+          },
+          "query": "from(bucket: \"macro_indicators\")\n  |> range(start: -5y)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"us_gdp_growth\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> last()",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 111,
+      "type": "timeseries",
+      "title": "",
+      "description": "FRED GDPC1. 2026 Q1: +2.0%. AI 투자가 생산성으로 연결",
+      "gridPos": {
+        "h": 9,
+        "w": 6,
+        "x": 18,
+        "y": 29
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "macro-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#37872D"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "gradientMode": "opacity",
+            "showPoints": "auto",
+            "pointSize": 4,
+            "spanNulls": true,
+            "axisBorderShow": false
+          },
+          "unit": "percent",
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "mappings": []
         },
+        "overrides": []
+      },
+      "options": {
         "tooltip": {
           "mode": "single",
           "sort": "none"
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "lastNotNull",
+            "min",
+            "max"
+          ]
         }
       },
       "targets": [
@@ -856,10 +1663,10 @@
       "title": "⑫ S&P 500 지수 (참조)",
       "description": "S&P 500 지수 추이. 모든 버블·정상 지표의 맥락 참조용",
       "gridPos": {
-        "h": 9,
+        "h": 3,
         "w": 24,
         "x": 0,
-        "y": 29
+        "y": 38
       },
       "datasource": {
         "type": "influxdb",
@@ -868,8 +1675,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "fixed",
-            "fixedColor": "#8AB8FF"
+            "mode": "thresholds"
           },
           "unit": "short",
           "decimals": 2,
@@ -888,8 +1694,8 @@
         "overrides": []
       },
       "options": {
-        "graphMode": "area",
-        "colorMode": "value",
+        "graphMode": "none",
+        "colorMode": "background",
         "justifyMode": "center",
         "textMode": "value",
         "orientation": "auto",
@@ -901,11 +1707,81 @@
           "values": false
         },
         "text": {
-          "valueSize": 38
+          "valueSize": 32
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "macro-influxdb"
+          },
+          "query": "from(bucket: \"macro_indicators\")\n  |> range(start: -5y)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"sp500_index\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> last()",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 112,
+      "type": "timeseries",
+      "title": "",
+      "description": "S&P 500 지수 추이. 모든 버블·정상 지표의 맥락 참조용",
+      "gridPos": {
+        "h": 9,
+        "w": 24,
+        "x": 0,
+        "y": 41
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "macro-influxdb"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#8AB8FF"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 12,
+            "gradientMode": "opacity",
+            "showPoints": "auto",
+            "pointSize": 4,
+            "spanNulls": true,
+            "axisBorderShow": false
+          },
+          "unit": "short",
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "mappings": []
         },
+        "overrides": []
+      },
+      "options": {
         "tooltip": {
           "mode": "single",
           "sort": "none"
+        },
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true,
+          "calcs": [
+            "lastNotNull",
+            "min",
+            "max"
+          ]
         }
       },
       "targets": [
@@ -939,5 +1815,5 @@
   "timezone": "Asia/Seoul",
   "title": "매크로 버블 지표 대시보드",
   "uid": "macro-bubble-dashboard-v1",
-  "version": 2
+  "version": 3
 }
