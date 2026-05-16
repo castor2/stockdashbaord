@@ -1,0 +1,17 @@
+apiVersion: 1
+
+datasources:
+  - name: InfluxDB-Macro
+    type: influxdb
+    uid: macro-influxdb
+    access: proxy
+    url: http://influxdb:8086
+    jsonData:
+      version: Flux
+      organization: stockdashboard
+      defaultBucket: macro_indicators
+      tlsSkipVerify: true
+    secureJsonData:
+      token: macro_dashboard_token_2026
+    isDefault: true
+    editable: true

@@ -1,0 +1,12 @@
+apiVersion: 1
+
+providers:
+  - name: macro-dashboards
+    orgId: 1
+    folder: "매크로 지표"
+    type: file
+    disableDeletion: false
+    editable: true
+    updateIntervalSeconds: 30
+    options:
+      path: /var/lib/grafana/dashboards
