@@ -4,18 +4,36 @@ import json
 
 DS = {"type": "influxdb", "uid": "macro-influxdb"}
 
-def flux(measurement: str) -> str:
+def flux_with_fallback(measurement: str) -> str:
+    """
+    선택된 기간 내 데이터 + 기간 이전 마지막 값을 union.
+    조회 기간이 짧아 데이터가 없어도 항상 마지막 값이 표시됨.
+    """
     return (
-        f'from(bucket: "macro_indicators")\n'
-        f'  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n'
-        f'  |> filter(fn: (r) => r["_measurement"] == "{measurement}")\n'
-        f'  |> filter(fn: (r) => r["_field"] == "value")\n'
-        f'  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n'
-        f'  |> yield(name: "mean")'
+        f'union(\n'
+        f'  tables: [\n'
+        f'    from(bucket: "macro_indicators")\n'
+        f'      |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n'
+        f'      |> filter(fn: (r) => r["_measurement"] == "{measurement}")\n'
+        f'      |> filter(fn: (r) => r["_field"] == "value"),\n'
+        f'    from(bucket: "macro_indicators")\n'
+        f'      |> range(start: -5y, stop: v.timeRangeStart)\n'
+        f'      |> filter(fn: (r) => r["_measurement"] == "{measurement}")\n'
+        f'      |> filter(fn: (r) => r["_field"] == "value")\n'
+        f'      |> last()\n'
+        f'  ]\n'
+        f')\n'
+        f'|> sort(columns: ["_time"])'
     )
 
-def timeseries_panel(pid, title, measurement, unit, color, gridpos,
-                     description="", thresholds=None, decimals=2):
+def stat_panel(pid, title, measurement, unit, color, gridpos,
+               description="", thresholds=None, decimals=2):
+    """
+    Stat 패널 (상단 큰 숫자 + 하단 sparkline 그래프).
+    - reduceOptions.calcs: ["lastNotNull"] → 항상 마지막 값 표시
+    - graphMode: "area" → 스파크라인 그래프 표시
+    - union 쿼리 → 단기 조회 시에도 마지막 값 보장
+    """
     threshold_steps = [{"color": "green", "value": None}]
     if thresholds:
         for val, col in thresholds:
@@ -23,7 +41,7 @@ def timeseries_panel(pid, title, measurement, unit, color, gridpos,
 
     return {
         "id": pid,
-        "type": "timeseries",
+        "type": "stat",
         "title": title,
         "description": description,
         "gridPos": gridpos,
@@ -31,17 +49,6 @@ def timeseries_panel(pid, title, measurement, unit, color, gridpos,
         "fieldConfig": {
             "defaults": {
                 "color": {"mode": "fixed", "fixedColor": color},
-                "custom": {
-                    "drawStyle": "line",
-                    "lineInterpolation": "smooth",
-                    "lineWidth": 2,
-                    "fillOpacity": 12,
-                    "gradientMode": "opacity",
-                    "showPoints": "auto",
-                    "pointSize": 4,
-                    "spanNulls": True,
-                    "axisBorderShow": False,
-                },
                 "unit": unit,
                 "decimals": decimals,
                 "thresholds": {
@@ -49,22 +56,28 @@ def timeseries_panel(pid, title, measurement, unit, color, gridpos,
                     "steps": threshold_steps,
                 },
                 "mappings": [],
+                "custom": {},
             },
             "overrides": [],
         },
         "options": {
-            "tooltip": {"mode": "single", "sort": "none"},
-            "legend": {
-                "displayMode": "list",
-                "placement": "bottom",
-                "showLegend": True,
-                "calcs": ["lastNotNull", "min", "max"],
+            "graphMode": "area",
+            "colorMode": "value",
+            "justifyMode": "center",
+            "textMode": "value",
+            "orientation": "auto",
+            "reduceOptions": {
+                "calcs": ["lastNotNull"],
+                "fields": "",
+                "values": False,
             },
+            "text": {"valueSize": 38},
+            "tooltip": {"mode": "single", "sort": "none"},
         },
         "targets": [
             {
                 "datasource": DS,
-                "query": flux(measurement),
+                "query": flux_with_fallback(measurement),
                 "refId": "A",
             }
         ],
@@ -113,7 +126,7 @@ row1_defs = [
 ]
 for pid, title, meas, unit, color, extra, desc, thresh in row1_defs:
     gp = extra["gridPos"]
-    panels.append(timeseries_panel(pid, title, meas, unit, color, gp, desc, thresh))
+    panels.append(stat_panel(pid, title, meas, unit, color, gp, desc, thresh))
 
 # Row 2 (y=10): M7, 버크셔, NVDA
 row2_defs = [
@@ -136,7 +149,7 @@ row2_defs = [
      None),
 ]
 for pid, title, meas, unit, color, gp, desc, thresh in row2_defs:
-    panels.append(timeseries_panel(pid, title, meas, unit, color, gp, desc, thresh))
+    panels.append(stat_panel(pid, title, meas, unit, color, gp, desc, thresh))
 
 # ── 정상 신호 행 헤더 ─────────────────────────────────────
 panels.append(row_panel(101, "🟢 정상 신호 (5대 반론 지표)", y=19))
@@ -168,10 +181,10 @@ row3_defs = [
      None),
 ]
 for pid, title, meas, unit, color, gp, desc, thresh in row3_defs:
-    panels.append(timeseries_panel(pid, title, meas, unit, color, gp, desc, thresh))
+    panels.append(stat_panel(pid, title, meas, unit, color, gp, desc, thresh))
 
 # Row 4 (y=29): S&P 500 지수 (전폭)
-panels.append(timeseries_panel(
+panels.append(stat_panel(
     12, "⑫ S&P 500 지수 (참조)",
     "sp500_index", "short", "#8AB8FF",
     {"h": 9, "w": 24, "x": 0, "y": 29},
@@ -205,7 +218,7 @@ dashboard = {
     "timezone": "Asia/Seoul",
     "title": "매크로 버블 지표 대시보드",
     "uid": "macro-bubble-dashboard-v1",
-    "version": 1,
+    "version": 2,
 }
 
 if __name__ == "__main__":

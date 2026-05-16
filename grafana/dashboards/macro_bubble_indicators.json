@@ -32,7 +32,7 @@
     },
     {
       "id": 1,
-      "type": "timeseries",
+      "type": "stat",
       "title": "① 버핏 지수 (Buffett Indicator)",
       "description": "워런 버핏이 '가장 좋은 단일 지표'라고 언급. 미국 주식시장 시총 ÷ GDP × 100. 현재 ~230% (적정 75-90%, 위험 ≥120%)",
       "gridPos": {
@@ -50,17 +50,6 @@
           "color": {
             "mode": "fixed",
             "fixedColor": "#F2495C"
-          },
-          "custom": {
-            "drawStyle": "line",
-            "lineInterpolation": "smooth",
-            "lineWidth": 2,
-            "fillOpacity": 12,
-            "gradientMode": "opacity",
-            "showPoints": "auto",
-            "pointSize": 4,
-            "spanNulls": true,
-            "axisBorderShow": false
           },
           "unit": "percent",
           "decimals": 2,
@@ -81,24 +70,30 @@
               }
             ]
           },
-          "mappings": []
+          "mappings": [],
+          "custom": {}
         },
         "overrides": []
       },
       "options": {
+        "graphMode": "area",
+        "colorMode": "value",
+        "justifyMode": "center",
+        "textMode": "value",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {
+          "valueSize": 38
+        },
         "tooltip": {
           "mode": "single",
           "sort": "none"
-        },
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true,
-          "calcs": [
-            "lastNotNull",
-            "min",
-            "max"
-          ]
         }
       },
       "targets": [
@@ -107,14 +102,14 @@
             "type": "influxdb",
             "uid": "macro-influxdb"
           },
-          "query": "from(bucket: \"macro_indicators\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"buffett_indicator\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"mean\")",
+          "query": "union(\n  tables: [\n    from(bucket: \"macro_indicators\")\n      |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n      |> filter(fn: (r) => r[\"_measurement\"] == \"buffett_indicator\")\n      |> filter(fn: (r) => r[\"_field\"] == \"value\"),\n    from(bucket: \"macro_indicators\")\n      |> range(start: -5y, stop: v.timeRangeStart)\n      |> filter(fn: (r) => r[\"_measurement\"] == \"buffett_indicator\")\n      |> filter(fn: (r) => r[\"_field\"] == \"value\")\n      |> last()\n  ]\n)\n|> sort(columns: [\"_time\"])",
           "refId": "A"
         }
       ]
     },
     {
       "id": 2,
-      "type": "timeseries",
+      "type": "stat",
       "title": "② 쉴러 PER (CAPE Ratio)",
       "description": "물가 보정 10년 평균 실적 기준 PER. 역사적 평균 17.7배. 현재 ~40배 (역대 2위, 1위=닷컴버블 44.2배)",
       "gridPos": {
@@ -132,17 +127,6 @@
           "color": {
             "mode": "fixed",
             "fixedColor": "#FF9830"
-          },
-          "custom": {
-            "drawStyle": "line",
-            "lineInterpolation": "smooth",
-            "lineWidth": 2,
-            "fillOpacity": 12,
-            "gradientMode": "opacity",
-            "showPoints": "auto",
-            "pointSize": 4,
-            "spanNulls": true,
-            "axisBorderShow": false
           },
           "unit": "none",
           "decimals": 2,
@@ -163,24 +147,30 @@
               }
             ]
           },
-          "mappings": []
+          "mappings": [],
+          "custom": {}
         },
         "overrides": []
       },
       "options": {
+        "graphMode": "area",
+        "colorMode": "value",
+        "justifyMode": "center",
+        "textMode": "value",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {
+          "valueSize": 38
+        },
         "tooltip": {
           "mode": "single",
           "sort": "none"
-        },
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true,
-          "calcs": [
-            "lastNotNull",
-            "min",
-            "max"
-          ]
         }
       },
       "targets": [
@@ -189,14 +179,14 @@
             "type": "influxdb",
             "uid": "macro-influxdb"
           },
-          "query": "from(bucket: \"macro_indicators\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"shiller_cape\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"mean\")",
+          "query": "union(\n  tables: [\n    from(bucket: \"macro_indicators\")\n      |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n      |> filter(fn: (r) => r[\"_measurement\"] == \"shiller_cape\")\n      |> filter(fn: (r) => r[\"_field\"] == \"value\"),\n    from(bucket: \"macro_indicators\")\n      |> range(start: -5y, stop: v.timeRangeStart)\n      |> filter(fn: (r) => r[\"_measurement\"] == \"shiller_cape\")\n      |> filter(fn: (r) => r[\"_field\"] == \"value\")\n      |> last()\n  ]\n)\n|> sort(columns: [\"_time\"])",
           "refId": "A"
         }
       ]
     },
     {
       "id": 3,
-      "type": "timeseries",
+      "type": "stat",
       "title": "③ 공포 탐욕 지수 (Fear & Greed)",
       "description": "CNN 제작 단기 심리 지표 (0=극도 공포, 100=극도 탐욕). 한 달 만에 27→69 급등",
       "gridPos": {
@@ -214,17 +204,6 @@
           "color": {
             "mode": "fixed",
             "fixedColor": "#FADE2A"
-          },
-          "custom": {
-            "drawStyle": "line",
-            "lineInterpolation": "smooth",
-            "lineWidth": 2,
-            "fillOpacity": 12,
-            "gradientMode": "opacity",
-            "showPoints": "auto",
-            "pointSize": 4,
-            "spanNulls": true,
-            "axisBorderShow": false
           },
           "unit": "none",
           "decimals": 2,
@@ -245,24 +224,30 @@
               }
             ]
           },
-          "mappings": []
+          "mappings": [],
+          "custom": {}
         },
         "overrides": []
       },
       "options": {
+        "graphMode": "area",
+        "colorMode": "value",
+        "justifyMode": "center",
+        "textMode": "value",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {
+          "valueSize": 38
+        },
         "tooltip": {
           "mode": "single",
           "sort": "none"
-        },
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true,
-          "calcs": [
-            "lastNotNull",
-            "min",
-            "max"
-          ]
         }
       },
       "targets": [
@@ -271,14 +256,14 @@
             "type": "influxdb",
             "uid": "macro-influxdb"
           },
-          "query": "from(bucket: \"macro_indicators\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"fear_greed_index\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"mean\")",
+          "query": "union(\n  tables: [\n    from(bucket: \"macro_indicators\")\n      |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n      |> filter(fn: (r) => r[\"_measurement\"] == \"fear_greed_index\")\n      |> filter(fn: (r) => r[\"_field\"] == \"value\"),\n    from(bucket: \"macro_indicators\")\n      |> range(start: -5y, stop: v.timeRangeStart)\n      |> filter(fn: (r) => r[\"_measurement\"] == \"fear_greed_index\")\n      |> filter(fn: (r) => r[\"_field\"] == \"value\")\n      |> last()\n  ]\n)\n|> sort(columns: [\"_time\"])",
           "refId": "A"
         }
       ]
     },
     {
       "id": 4,
-      "type": "timeseries",
+      "type": "stat",
       "title": "④ 신용융자 잔고 (Margin Debt)",
       "description": "빚내서 투자하는 금액 (십억 달러). 현재 ~1.2조 달러, 전년比 +38.7%. 하락 시 마진콜 → 폭락 가속 위험",
       "gridPos": {
@@ -296,17 +281,6 @@
           "color": {
             "mode": "fixed",
             "fixedColor": "#F2495C"
-          },
-          "custom": {
-            "drawStyle": "line",
-            "lineInterpolation": "smooth",
-            "lineWidth": 2,
-            "fillOpacity": 12,
-            "gradientMode": "opacity",
-            "showPoints": "auto",
-            "pointSize": 4,
-            "spanNulls": true,
-            "axisBorderShow": false
           },
           "unit": "short",
           "decimals": 2,
@@ -327,24 +301,30 @@
               }
             ]
           },
-          "mappings": []
+          "mappings": [],
+          "custom": {}
         },
         "overrides": []
       },
       "options": {
+        "graphMode": "area",
+        "colorMode": "value",
+        "justifyMode": "center",
+        "textMode": "value",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {
+          "valueSize": 38
+        },
         "tooltip": {
           "mode": "single",
           "sort": "none"
-        },
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true,
-          "calcs": [
-            "lastNotNull",
-            "min",
-            "max"
-          ]
         }
       },
       "targets": [
@@ -353,14 +333,14 @@
             "type": "influxdb",
             "uid": "macro-influxdb"
           },
-          "query": "from(bucket: \"macro_indicators\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"margin_debt\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"mean\")",
+          "query": "union(\n  tables: [\n    from(bucket: \"macro_indicators\")\n      |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n      |> filter(fn: (r) => r[\"_measurement\"] == \"margin_debt\")\n      |> filter(fn: (r) => r[\"_field\"] == \"value\"),\n    from(bucket: \"macro_indicators\")\n      |> range(start: -5y, stop: v.timeRangeStart)\n      |> filter(fn: (r) => r[\"_measurement\"] == \"margin_debt\")\n      |> filter(fn: (r) => r[\"_field\"] == \"value\")\n      |> last()\n  ]\n)\n|> sort(columns: [\"_time\"])",
           "refId": "A"
         }
       ]
     },
     {
       "id": 5,
-      "type": "timeseries",
+      "type": "stat",
       "title": "⑤ 매그니피센트 7 집중도",
       "description": "애플·MS·구글·아마존·메타·엔비디아·테슬라 7개사가 S&P 500에서 차지하는 비중. 현재 33.7% (2016년 12.5%에서 3배 증가)",
       "gridPos": {
@@ -378,17 +358,6 @@
           "color": {
             "mode": "fixed",
             "fixedColor": "#FF780A"
-          },
-          "custom": {
-            "drawStyle": "line",
-            "lineInterpolation": "smooth",
-            "lineWidth": 2,
-            "fillOpacity": 12,
-            "gradientMode": "opacity",
-            "showPoints": "auto",
-            "pointSize": 4,
-            "spanNulls": true,
-            "axisBorderShow": false
           },
           "unit": "percent",
           "decimals": 2,
@@ -409,24 +378,30 @@
               }
             ]
           },
-          "mappings": []
+          "mappings": [],
+          "custom": {}
         },
         "overrides": []
       },
       "options": {
+        "graphMode": "area",
+        "colorMode": "value",
+        "justifyMode": "center",
+        "textMode": "value",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {
+          "valueSize": 38
+        },
         "tooltip": {
           "mode": "single",
           "sort": "none"
-        },
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true,
-          "calcs": [
-            "lastNotNull",
-            "min",
-            "max"
-          ]
         }
       },
       "targets": [
@@ -435,14 +410,14 @@
             "type": "influxdb",
             "uid": "macro-influxdb"
           },
-          "query": "from(bucket: \"macro_indicators\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"mag7_concentration\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"mean\")",
+          "query": "union(\n  tables: [\n    from(bucket: \"macro_indicators\")\n      |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n      |> filter(fn: (r) => r[\"_measurement\"] == \"mag7_concentration\")\n      |> filter(fn: (r) => r[\"_field\"] == \"value\"),\n    from(bucket: \"macro_indicators\")\n      |> range(start: -5y, stop: v.timeRangeStart)\n      |> filter(fn: (r) => r[\"_measurement\"] == \"mag7_concentration\")\n      |> filter(fn: (r) => r[\"_field\"] == \"value\")\n      |> last()\n  ]\n)\n|> sort(columns: [\"_time\"])",
           "refId": "A"
         }
       ]
     },
     {
       "id": 6,
-      "type": "timeseries",
+      "type": "stat",
       "title": "⑥ 버크셔 해서웨이 현금",
       "description": "버크셔 현금+단기국채 보유액 (십억 달러). 현재 ~3,970억 달러 (약 540조원). 닷컴버블·서브프라임 직전과 유사한 패턴",
       "gridPos": {
@@ -461,17 +436,6 @@
             "mode": "fixed",
             "fixedColor": "#FF4D4D"
           },
-          "custom": {
-            "drawStyle": "line",
-            "lineInterpolation": "smooth",
-            "lineWidth": 2,
-            "fillOpacity": 12,
-            "gradientMode": "opacity",
-            "showPoints": "auto",
-            "pointSize": 4,
-            "spanNulls": true,
-            "axisBorderShow": false
-          },
           "unit": "short",
           "decimals": 2,
           "thresholds": {
@@ -483,24 +447,30 @@
               }
             ]
           },
-          "mappings": []
+          "mappings": [],
+          "custom": {}
         },
         "overrides": []
       },
       "options": {
+        "graphMode": "area",
+        "colorMode": "value",
+        "justifyMode": "center",
+        "textMode": "value",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {
+          "valueSize": 38
+        },
         "tooltip": {
           "mode": "single",
           "sort": "none"
-        },
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true,
-          "calcs": [
-            "lastNotNull",
-            "min",
-            "max"
-          ]
         }
       },
       "targets": [
@@ -509,14 +479,14 @@
             "type": "influxdb",
             "uid": "macro-influxdb"
           },
-          "query": "from(bucket: \"macro_indicators\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"berkshire_cash\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"mean\")",
+          "query": "union(\n  tables: [\n    from(bucket: \"macro_indicators\")\n      |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n      |> filter(fn: (r) => r[\"_measurement\"] == \"berkshire_cash\")\n      |> filter(fn: (r) => r[\"_field\"] == \"value\"),\n    from(bucket: \"macro_indicators\")\n      |> range(start: -5y, stop: v.timeRangeStart)\n      |> filter(fn: (r) => r[\"_measurement\"] == \"berkshire_cash\")\n      |> filter(fn: (r) => r[\"_field\"] == \"value\")\n      |> last()\n  ]\n)\n|> sort(columns: [\"_time\"])",
           "refId": "A"
         }
       ]
     },
     {
       "id": 7,
-      "type": "timeseries",
+      "type": "stat",
       "title": "⑦ AI 순환거래 지수 (NVDA 분기 매출 proxy)",
       "description": "엔비디아 분기 매출 (십억 달러). AI 기업간 자금 순환의 핵심 proxy. 현재 분기 매출 ~52B",
       "gridPos": {
@@ -535,17 +505,6 @@
             "mode": "fixed",
             "fixedColor": "#E02F44"
           },
-          "custom": {
-            "drawStyle": "line",
-            "lineInterpolation": "smooth",
-            "lineWidth": 2,
-            "fillOpacity": 12,
-            "gradientMode": "opacity",
-            "showPoints": "auto",
-            "pointSize": 4,
-            "spanNulls": true,
-            "axisBorderShow": false
-          },
           "unit": "short",
           "decimals": 2,
           "thresholds": {
@@ -557,24 +516,30 @@
               }
             ]
           },
-          "mappings": []
+          "mappings": [],
+          "custom": {}
         },
         "overrides": []
       },
       "options": {
+        "graphMode": "area",
+        "colorMode": "value",
+        "justifyMode": "center",
+        "textMode": "value",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {
+          "valueSize": 38
+        },
         "tooltip": {
           "mode": "single",
           "sort": "none"
-        },
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true,
-          "calcs": [
-            "lastNotNull",
-            "min",
-            "max"
-          ]
         }
       },
       "targets": [
@@ -583,7 +548,7 @@
             "type": "influxdb",
             "uid": "macro-influxdb"
           },
-          "query": "from(bucket: \"macro_indicators\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"nvda_revenue\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"mean\")",
+          "query": "union(\n  tables: [\n    from(bucket: \"macro_indicators\")\n      |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n      |> filter(fn: (r) => r[\"_measurement\"] == \"nvda_revenue\")\n      |> filter(fn: (r) => r[\"_field\"] == \"value\"),\n    from(bucket: \"macro_indicators\")\n      |> range(start: -5y, stop: v.timeRangeStart)\n      |> filter(fn: (r) => r[\"_measurement\"] == \"nvda_revenue\")\n      |> filter(fn: (r) => r[\"_field\"] == \"value\")\n      |> last()\n  ]\n)\n|> sort(columns: [\"_time\"])",
           "refId": "A"
         }
       ]
@@ -603,7 +568,7 @@
     },
     {
       "id": 8,
-      "type": "timeseries",
+      "type": "stat",
       "title": "⑧ S&P 500 동일가중 선행 PER",
       "description": "매그니피센트 7 왜곡 제거 후 PER. 현재 ~17배 = 10년 평균 수준. '나머지 493개 기업은 정상 가격'",
       "gridPos": {
@@ -621,17 +586,6 @@
           "color": {
             "mode": "fixed",
             "fixedColor": "#3CBC8D"
-          },
-          "custom": {
-            "drawStyle": "line",
-            "lineInterpolation": "smooth",
-            "lineWidth": 2,
-            "fillOpacity": 12,
-            "gradientMode": "opacity",
-            "showPoints": "auto",
-            "pointSize": 4,
-            "spanNulls": true,
-            "axisBorderShow": false
           },
           "unit": "none",
           "decimals": 2,
@@ -652,24 +606,30 @@
               }
             ]
           },
-          "mappings": []
+          "mappings": [],
+          "custom": {}
         },
         "overrides": []
       },
       "options": {
+        "graphMode": "area",
+        "colorMode": "value",
+        "justifyMode": "center",
+        "textMode": "value",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {
+          "valueSize": 38
+        },
         "tooltip": {
           "mode": "single",
           "sort": "none"
-        },
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true,
-          "calcs": [
-            "lastNotNull",
-            "min",
-            "max"
-          ]
         }
       },
       "targets": [
@@ -678,14 +638,14 @@
             "type": "influxdb",
             "uid": "macro-influxdb"
           },
-          "query": "from(bucket: \"macro_indicators\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"sp500_equal_weight_per\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"mean\")",
+          "query": "union(\n  tables: [\n    from(bucket: \"macro_indicators\")\n      |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n      |> filter(fn: (r) => r[\"_measurement\"] == \"sp500_equal_weight_per\")\n      |> filter(fn: (r) => r[\"_field\"] == \"value\"),\n    from(bucket: \"macro_indicators\")\n      |> range(start: -5y, stop: v.timeRangeStart)\n      |> filter(fn: (r) => r[\"_measurement\"] == \"sp500_equal_weight_per\")\n      |> filter(fn: (r) => r[\"_field\"] == \"value\")\n      |> last()\n  ]\n)\n|> sort(columns: [\"_time\"])",
           "refId": "A"
         }
       ]
     },
     {
       "id": 9,
-      "type": "timeseries",
+      "type": "stat",
       "title": "⑨ S&P 500 이익 성장률 (YoY %)",
       "description": "S&P 500 기업 분기 이익 성장률. 6분기 연속 두 자릿수 성장. 2026 Q1: 15.1% (예상 10% 상회)",
       "gridPos": {
@@ -704,17 +664,6 @@
             "mode": "fixed",
             "fixedColor": "#73BF69"
           },
-          "custom": {
-            "drawStyle": "line",
-            "lineInterpolation": "smooth",
-            "lineWidth": 2,
-            "fillOpacity": 12,
-            "gradientMode": "opacity",
-            "showPoints": "auto",
-            "pointSize": 4,
-            "spanNulls": true,
-            "axisBorderShow": false
-          },
           "unit": "percent",
           "decimals": 2,
           "thresholds": {
@@ -726,24 +675,30 @@
               }
             ]
           },
-          "mappings": []
+          "mappings": [],
+          "custom": {}
         },
         "overrides": []
       },
       "options": {
+        "graphMode": "area",
+        "colorMode": "value",
+        "justifyMode": "center",
+        "textMode": "value",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {
+          "valueSize": 38
+        },
         "tooltip": {
           "mode": "single",
           "sort": "none"
-        },
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true,
-          "calcs": [
-            "lastNotNull",
-            "min",
-            "max"
-          ]
         }
       },
       "targets": [
@@ -752,14 +707,14 @@
             "type": "influxdb",
             "uid": "macro-influxdb"
           },
-          "query": "from(bucket: \"macro_indicators\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"sp500_eps_growth\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"mean\")",
+          "query": "union(\n  tables: [\n    from(bucket: \"macro_indicators\")\n      |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n      |> filter(fn: (r) => r[\"_measurement\"] == \"sp500_eps_growth\")\n      |> filter(fn: (r) => r[\"_field\"] == \"value\"),\n    from(bucket: \"macro_indicators\")\n      |> range(start: -5y, stop: v.timeRangeStart)\n      |> filter(fn: (r) => r[\"_measurement\"] == \"sp500_eps_growth\")\n      |> filter(fn: (r) => r[\"_field\"] == \"value\")\n      |> last()\n  ]\n)\n|> sort(columns: [\"_time\"])",
           "refId": "A"
         }
       ]
     },
     {
       "id": 10,
-      "type": "timeseries",
+      "type": "stat",
       "title": "⑩ 빅테크 현금 보유 (M7 합산)",
       "description": "매그니피센트 7 현금+단기투자 합산 (십억 달러). 현재 5,000억 달러 이상. 부채가 아닌 자기자본으로 AI 인프라 투자",
       "gridPos": {
@@ -778,17 +733,6 @@
             "mode": "fixed",
             "fixedColor": "#5794F2"
           },
-          "custom": {
-            "drawStyle": "line",
-            "lineInterpolation": "smooth",
-            "lineWidth": 2,
-            "fillOpacity": 12,
-            "gradientMode": "opacity",
-            "showPoints": "auto",
-            "pointSize": 4,
-            "spanNulls": true,
-            "axisBorderShow": false
-          },
           "unit": "short",
           "decimals": 2,
           "thresholds": {
@@ -800,24 +744,30 @@
               }
             ]
           },
-          "mappings": []
+          "mappings": [],
+          "custom": {}
         },
         "overrides": []
       },
       "options": {
+        "graphMode": "area",
+        "colorMode": "value",
+        "justifyMode": "center",
+        "textMode": "value",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {
+          "valueSize": 38
+        },
         "tooltip": {
           "mode": "single",
           "sort": "none"
-        },
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true,
-          "calcs": [
-            "lastNotNull",
-            "min",
-            "max"
-          ]
         }
       },
       "targets": [
@@ -826,14 +776,14 @@
             "type": "influxdb",
             "uid": "macro-influxdb"
           },
-          "query": "from(bucket: \"macro_indicators\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"bigtech_cash\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"mean\")",
+          "query": "union(\n  tables: [\n    from(bucket: \"macro_indicators\")\n      |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n      |> filter(fn: (r) => r[\"_measurement\"] == \"bigtech_cash\")\n      |> filter(fn: (r) => r[\"_field\"] == \"value\"),\n    from(bucket: \"macro_indicators\")\n      |> range(start: -5y, stop: v.timeRangeStart)\n      |> filter(fn: (r) => r[\"_measurement\"] == \"bigtech_cash\")\n      |> filter(fn: (r) => r[\"_field\"] == \"value\")\n      |> last()\n  ]\n)\n|> sort(columns: [\"_time\"])",
           "refId": "A"
         }
       ]
     },
     {
       "id": 11,
-      "type": "timeseries",
+      "type": "stat",
       "title": "⑪ 미국 실질 GDP 성장률 (YoY %)",
       "description": "FRED GDPC1 기준 실질 GDP 전년비 성장률. 2026 Q1: +2.0%. AI 투자가 거시경제 생산성으로 연결되는 신호",
       "gridPos": {
@@ -852,17 +802,6 @@
             "mode": "fixed",
             "fixedColor": "#37872D"
           },
-          "custom": {
-            "drawStyle": "line",
-            "lineInterpolation": "smooth",
-            "lineWidth": 2,
-            "fillOpacity": 12,
-            "gradientMode": "opacity",
-            "showPoints": "auto",
-            "pointSize": 4,
-            "spanNulls": true,
-            "axisBorderShow": false
-          },
           "unit": "percent",
           "decimals": 2,
           "thresholds": {
@@ -874,24 +813,30 @@
               }
             ]
           },
-          "mappings": []
+          "mappings": [],
+          "custom": {}
         },
         "overrides": []
       },
       "options": {
+        "graphMode": "area",
+        "colorMode": "value",
+        "justifyMode": "center",
+        "textMode": "value",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {
+          "valueSize": 38
+        },
         "tooltip": {
           "mode": "single",
           "sort": "none"
-        },
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true,
-          "calcs": [
-            "lastNotNull",
-            "min",
-            "max"
-          ]
         }
       },
       "targets": [
@@ -900,14 +845,14 @@
             "type": "influxdb",
             "uid": "macro-influxdb"
           },
-          "query": "from(bucket: \"macro_indicators\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"us_gdp_growth\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"mean\")",
+          "query": "union(\n  tables: [\n    from(bucket: \"macro_indicators\")\n      |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n      |> filter(fn: (r) => r[\"_measurement\"] == \"us_gdp_growth\")\n      |> filter(fn: (r) => r[\"_field\"] == \"value\"),\n    from(bucket: \"macro_indicators\")\n      |> range(start: -5y, stop: v.timeRangeStart)\n      |> filter(fn: (r) => r[\"_measurement\"] == \"us_gdp_growth\")\n      |> filter(fn: (r) => r[\"_field\"] == \"value\")\n      |> last()\n  ]\n)\n|> sort(columns: [\"_time\"])",
           "refId": "A"
         }
       ]
     },
     {
       "id": 12,
-      "type": "timeseries",
+      "type": "stat",
       "title": "⑫ S&P 500 지수 (참조)",
       "description": "S&P 500 지수 추이. 모든 버블·정상 지표의 맥락 참조용",
       "gridPos": {
@@ -926,17 +871,6 @@
             "mode": "fixed",
             "fixedColor": "#8AB8FF"
           },
-          "custom": {
-            "drawStyle": "line",
-            "lineInterpolation": "smooth",
-            "lineWidth": 2,
-            "fillOpacity": 12,
-            "gradientMode": "opacity",
-            "showPoints": "auto",
-            "pointSize": 4,
-            "spanNulls": true,
-            "axisBorderShow": false
-          },
           "unit": "short",
           "decimals": 2,
           "thresholds": {
@@ -948,24 +882,30 @@
               }
             ]
           },
-          "mappings": []
+          "mappings": [],
+          "custom": {}
         },
         "overrides": []
       },
       "options": {
+        "graphMode": "area",
+        "colorMode": "value",
+        "justifyMode": "center",
+        "textMode": "value",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {
+          "valueSize": 38
+        },
         "tooltip": {
           "mode": "single",
           "sort": "none"
-        },
-        "legend": {
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true,
-          "calcs": [
-            "lastNotNull",
-            "min",
-            "max"
-          ]
         }
       },
       "targets": [
@@ -974,7 +914,7 @@
             "type": "influxdb",
             "uid": "macro-influxdb"
           },
-          "query": "from(bucket: \"macro_indicators\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"sp500_index\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"mean\")",
+          "query": "union(\n  tables: [\n    from(bucket: \"macro_indicators\")\n      |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n      |> filter(fn: (r) => r[\"_measurement\"] == \"sp500_index\")\n      |> filter(fn: (r) => r[\"_field\"] == \"value\"),\n    from(bucket: \"macro_indicators\")\n      |> range(start: -5y, stop: v.timeRangeStart)\n      |> filter(fn: (r) => r[\"_measurement\"] == \"sp500_index\")\n      |> filter(fn: (r) => r[\"_field\"] == \"value\")\n      |> last()\n  ]\n)\n|> sort(columns: [\"_time\"])",
           "refId": "A"
         }
       ]
@@ -999,5 +939,5 @@
   "timezone": "Asia/Seoul",
   "title": "매크로 버블 지표 대시보드",
   "uid": "macro-bubble-dashboard-v1",
-  "version": 1
+  "version": 2
 }
