@@ -51,10 +51,12 @@ services:
       - INFLUXDB_ORG=${INFLUXDB_ORG:-stockdashboard}
       - INFLUXDB_BUCKET=${INFLUXDB_BUCKET:-macro_indicators}
       - FRED_API_KEY=${FRED_API_KEY:-}
+      - TZ=${TZ:-Asia/Seoul}
+      - COLLECT_DAILY_AT=${COLLECT_DAILY_AT:-09:00}
     depends_on:
       influxdb:
         condition: service_healthy
-    restart: "no"
+    restart: unless-stopped
 
 volumes:
   influxdb_data:

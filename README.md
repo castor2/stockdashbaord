@@ -63,9 +63,10 @@
 ```
 
 **데이터 흐름:**
-1. `collector` 컨테이너가 외부 API(FRED, yfinance, CNN)로부터 3년치 데이터 수집
-2. InfluxDB에 time-series 포맷으로 저장
-3. Grafana가 InfluxDB를 datasource로 연결, Flux 쿼리로 12개 패널 렌더링
+1. `collector` 컨테이너가 시작 시 즉시 1회 수집 후, **매일 `COLLECT_DAILY_AT`(기본 09:00 KST)** 에 자동 갱신
+2. 외부 API(FRED, yfinance, CNN)로부터 3년치 데이터 수집
+3. InfluxDB에 time-series 포맷으로 저장
+4. Grafana가 InfluxDB를 datasource로 연결, Flux 쿼리로 12개 패널 렌더링
 
 ---
 
@@ -96,9 +97,27 @@ open http://localhost:3000
 
 ### 데이터 갱신
 
+`collector`는 **상시 실행**되며, 아래처럼 자동/수동 갱신을 지원합니다.
+
+| 방식 | 설명 |
+|------|------|
+| **자동 (기본)** | 컨테이너 시작 시 1회 + 매일 `COLLECT_DAILY_AT` (기본 `09:00`, `TZ=Asia/Seoul`) |
+| **수동 즉시** | `docker compose exec collector python -u collect.py` |
+| **스케줄러 재시작** | `docker compose restart collector` (재시작 시 즉시 1회 수집) |
+
+스케줄 변경은 `.env`에서 설정합니다.
+
+```env
+TZ=Asia/Seoul
+COLLECT_DAILY_AT=09:00   # HH:MM (24시간)
+```
+
 ```bash
-# 수집기 재실행으로 최신 데이터 갱신
-docker compose up collector --force-recreate
+# 스케줄 반영
+docker compose up -d collector
+
+# 수집 로그 확인
+docker compose logs -f collector
 ```
 
 ### 종료
@@ -134,6 +153,7 @@ stockdashbaord/
 │   ├── Dockerfile                  # Python 수집기 이미지
 │   ├── requirements.txt            # Python 의존성
 │   ├── collect.py                  # 12개 지표 수집 메인 스크립트
+│   ├── schedule.py                 # 매일 1회 자동 갱신 스케줄러
 │   └── generate_dashboard.py       # Grafana 대시보드 JSON 생성기
 │
 └── grafana/

@@ -606,9 +606,9 @@ COLLECTORS = [
 ]
 
 
-def main() -> None:
+def main() -> int:
     if not wait_for_influxdb():
-        sys.exit(1)
+        return 1
 
     with InfluxDBClient(url=INFLUXDB_URL, token=INFLUXDB_TOKEN, org=INFLUXDB_ORG) as client:
         write_api = client.write_api(write_options=SYNCHRONOUS)
@@ -624,9 +624,11 @@ def main() -> None:
 
     if errors:
         logger.warning(f"⚠️  실패한 수집기: {errors}")
-    else:
-        logger.info("✅ 모든 데이터 수집 완료!")
+        return 1
+
+    logger.info("✅ 모든 데이터 수집 완료!")
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
