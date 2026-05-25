@@ -1,12 +1,11 @@
-version: "3.8"
-
 services:
   influxdb:
+    profiles: ["embedded"]
     image: influxdb:2.7
     container_name: macro_influxdb
     restart: unless-stopped
     ports:
-      - "8086:8086"
+      - "${INFLUXDB_PORT:-8086}:8086"
     environment:
       - DOCKER_INFLUXDB_INIT_MODE=setup
       - DOCKER_INFLUXDB_INIT_USERNAME=${INFLUXDB_ADMIN_USER:-admin}
@@ -24,11 +23,12 @@ services:
       start_period: 30s
 
   grafana:
+    profiles: ["embedded"]
     image: grafana/grafana:10.4.0
     container_name: macro_grafana
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "${GRAFANA_PORT:-3000}:3000"
     environment:
       - GF_SECURITY_ADMIN_USER=${GF_ADMIN_USER:-admin}
       - GF_SECURITY_ADMIN_PASSWORD=${GF_ADMIN_PASSWORD:-admin123}
@@ -46,16 +46,22 @@ services:
       context: ./data-collector
     container_name: macro_collector
     environment:
-      - INFLUXDB_URL=http://influxdb:8086
+      - USE_EXISTING_SERVICES=${USE_EXISTING_SERVICES:-false}
+      - INFLUXDB_HOST=${INFLUXDB_HOST:-influxdb}
+      - INFLUXDB_PORT=${INFLUXDB_PORT:-8086}
+      - INFLUXDB_URL=${INFLUXDB_URL:-}
       - INFLUXDB_TOKEN=${INFLUXDB_TOKEN:-macro_dashboard_token_2026}
       - INFLUXDB_ORG=${INFLUXDB_ORG:-stockdashboard}
       - INFLUXDB_BUCKET=${INFLUXDB_BUCKET:-macro_indicators}
       - FRED_API_KEY=${FRED_API_KEY:-}
       - TZ=${TZ:-Asia/Seoul}
       - COLLECT_DAILY_AT=${COLLECT_DAILY_AT:-09:00}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       influxdb:
         condition: service_healthy
+        required: false
     restart: unless-stopped
 
 volumes:

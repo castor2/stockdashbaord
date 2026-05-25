@@ -85,15 +85,69 @@ cd stockdashbaord
 
 # 2. 환경변수 설정
 cp .env.example .env
-# (선택) .env 파일에서 FRED_API_KEY 설정 가능
+# (선택) .env 파일에서 FRED_API_KEY, 배포 모드 설정
 
-# 3. 전체 실행 (InfluxDB + Grafana + 데이터 수집)
-docker compose up -d
+# 3. 실행 (.env의 USE_EXISTING_SERVICES에 따라 자동 분기)
+chmod +x scripts/up.sh scripts/down.sh
+./scripts/up.sh
 
-# 4. 브라우저에서 대시보드 열기
+# 4. 브라우저에서 대시보드 열기 (내장 Grafana 모드)
 open http://localhost:3000
 # 초기 로그인: admin / admin123
 ```
+
+### 배포 모드 (`.env`)
+
+| 모드 | `USE_EXISTING_SERVICES` | 실행되는 서비스 |
+|------|-------------------------|----------------|
+| **내장 (기본)** | `false` | InfluxDB + Grafana + collector |
+| **기존 서비스 사용** | `true` | collector만 (기존 InfluxDB/Grafana 연결) |
+
+**내장 모드 (기본)**
+
+```env
+USE_EXISTING_SERVICES=false
+COMPOSE_PROFILES=embedded
+INFLUXDB_HOST=influxdb
+INFLUXDB_PORT=8086
+GRAFANA_HOST=localhost
+GRAFANA_PORT=3000
+```
+
+**기존 InfluxDB/Grafana 사용 모드**
+
+```env
+USE_EXISTING_SERVICES=true
+COMPOSE_PROFILES=
+
+# collector 컨테이너 → 호스트의 InfluxDB 접속
+INFLUXDB_HOST=host.docker.internal
+INFLUXDB_PORT=8086
+INFLUXDB_TOKEN=<기존 InfluxDB API 토큰>
+INFLUXDB_ORG=<기존 org>
+INFLUXDB_BUCKET=macro_indicators
+
+# 기존 Grafana UI 주소 (참고용)
+GRAFANA_HOST=localhost
+GRAFANA_PORT=3000
+```
+
+```bash
+./scripts/up.sh   # collector만 실행
+```
+
+기존 Grafana에 대시보드를 연결하려면:
+
+1. InfluxDB에 bucket `macro_indicators` 생성 (없을 경우)
+2. Grafana → Connections → Data sources → InfluxDB 추가  
+   - Query Language: **Flux**  
+   - URL: `http://<influxdb-host>:8086`  
+   - Organization / Token / Default bucket 설정
+3. Dashboards → Import → `grafana/dashboards/macro_bubble_indicators.json` 업로드
+4. datasource UID가 `macro-influxdb`가 아니면 import 후 datasource를 수동 매핑
+
+> Mac/Windows Docker Desktop: `INFLUXDB_HOST=host.docker.internal`  
+> Linux: `INFLUXDB_HOST=172.17.0.1` 또는 호스트 IP 사용
 
 ### 데이터 갱신
 
@@ -123,8 +177,8 @@ docker compose logs -f collector
 ### 종료
 
 ```bash
-docker compose down           # 컨테이너만 종료 (데이터 보존)
-docker compose down -v        # 데이터 볼륨까지 삭제
+./scripts/down.sh             # .env 모드에 맞게 중지
+docker compose down -v        # 내장 모드 볼륨까지 삭제
 ```
 
 ---
@@ -144,7 +198,10 @@ docker compose down -v        # 데이터 볼륨까지 삭제
 
 ```
 stockdashbaord/
-├── docker-compose.yml              # 전체 서비스 정의
+├── docker-compose.yml              # 서비스 정의 (embedded 프로필: InfluxDB/Grafana)
+├── scripts/
+│   ├── up.sh                       # .env 모드에 따라 스택/collector 실행
+│   └── down.sh                     # .env 모드에 따라 중지
 ├── .env.example                    # 환경변수 템플릿
 ├── .env                            # 실제 환경변수 (git 제외)
 ├── outline.md                      # 프로젝트 기획서

@@ -45,7 +45,16 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # ─── 설정 ────────────────────────────────────────────────────
-INFLUXDB_URL    = os.environ.get("INFLUXDB_URL",    "http://localhost:8086")
+def resolve_influxdb_url() -> str:
+    explicit = os.environ.get("INFLUXDB_URL", "").strip()
+    if explicit:
+        return explicit
+    host = os.environ.get("INFLUXDB_HOST", "influxdb")
+    port = os.environ.get("INFLUXDB_PORT", "8086")
+    return f"http://{host}:{port}"
+
+
+INFLUXDB_URL    = resolve_influxdb_url()
 INFLUXDB_TOKEN  = os.environ.get("INFLUXDB_TOKEN",  "macro_dashboard_token_2026")
 INFLUXDB_ORG    = os.environ.get("INFLUXDB_ORG",    "stockdashboard")
 INFLUXDB_BUCKET = os.environ.get("INFLUXDB_BUCKET", "macro_indicators")
@@ -65,7 +74,7 @@ HEADERS = {
 
 # ─── InfluxDB 유틸 ───────────────────────────────────────────
 def wait_for_influxdb(max_wait: int = 180) -> bool:
-    logger.info("InfluxDB 준비 대기 중...")
+    logger.info("InfluxDB 준비 대기 중... (%s)", INFLUXDB_URL)
     for attempt in range(max_wait // 5):
         try:
             with InfluxDBClient(url=INFLUXDB_URL, token=INFLUXDB_TOKEN, org=INFLUXDB_ORG) as c:
