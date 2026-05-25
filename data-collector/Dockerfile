@@ -7,6 +7,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY collect.py schedule.py .
+COPY collect.py schedule.py generate_dashboard.py /app/
 
 CMD ["python", "-u", "schedule.py"]
